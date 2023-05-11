@@ -32,6 +32,8 @@ let layerControl = L.control.layers({
     "Temperature": themaLayer.temperature.addTo(map),
 }).addTo(map);
 
+layerControl.expand();
+
 // Maßstab
 L.control.scale({
     imperial: false,
@@ -71,15 +73,13 @@ function writeTemperatureLayer(jsondata){
         filter: function(feature){
             if (feature.properties.LT > -50 && feature.properties.LT < 50) {
                 return true;
-
             }
-
         },
         pointToLayer: function (feature, latlng) {
             return L.marker(latlng, {
                 icon: L.divIcon({
                     className: "aws-div-icon",
-                   html:`<span>${feature.properties.LT}</span>`
+                   html:`<span>${feature.properties.LT.toFixed(1)}</span>`
                 })
             });
         },
@@ -87,7 +87,8 @@ function writeTemperatureLayer(jsondata){
     }).addTo(themaLayer.temperature);
 
 }
-//Wetterstationen
+
+//Wetterstationen, Temperatur
 async function loadStations(url) {
     let response = await fetch(url);
     let jsondata = await response.json();
