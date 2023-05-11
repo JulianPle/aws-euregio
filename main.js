@@ -13,7 +13,8 @@ let map = L.map("map", {
 
 // thematische Layer
 let themaLayer = {
-    stations: L.featureGroup()
+    stations: L.featureGroup(),
+    temperature: L.featureGroup(),
 }
 
 // Hintergrundlayer
@@ -27,7 +28,8 @@ let layerControl = L.control.layers({
     "Esri WorldTopoMap": L.tileLayer.provider("Esri.WorldTopoMap"),
     "Esri WorldImagery": L.tileLayer.provider("Esri.WorldImagery")
 }, {
-    "Wetterstationen": themaLayer.stations.addTo(map)
+    "Wetterstationen": themaLayer.stations.addTo(map),
+    "Temperature": themaLayer.temperature.addTo(map),
 }).addTo(map);
 
 // Maßstab
@@ -35,12 +37,7 @@ L.control.scale({
     imperial: false,
 }).addTo(map);
 
-// Wetterstationen
-async function showStations(url) {
-    let response = await fetch(url);
-    let jsondata = await response.json();
-
-    console.log(jsondata.features);
+function writeStationLayer(jsondata){
     L.geoJSON(jsondata, {
         pointToLayer: function (feature, latlng) {
             return L.marker(latlng, {
@@ -56,16 +53,22 @@ async function showStations(url) {
             let prop = feature.properties;
 
             let pointInTime = new Date (prop.date);
-            console.log(pointInTime);
-            layer.bindPopup(`<h3>${feature.properties.name}, ${feature.geometry.coordinates[2]} m </h3><br> 
-                            <b>Lufttemperatur: </b> ${feature.properties.LT ? feature.properties.LT + " °C" : "nicht verfügbar"} <br>
-                            <b>Relative Luftfeuchte: </b>${feature.properties.RH ? feature.properties.RH + " %" : "nicht verfügbar"} <br>
-                            <b>Windgeschwindigkeit:</b> ${feature.properties.WG ? (feature.properties.WG * 3.6) .toFixed(1) + " km/h" : "nicht verfügbar"} <br>
-                            <b>Schneehöhe: </b>${feature.properties.HS ? feature.properties.HS + " cm" : "nicht verfügbar"}<br><br>
+            //console.log(pointInTime);
+            layer.bindPopup(`<h3>${prop.name}, ${feature.geometry.coordinates[2]} m </h3><br> 
+                            <b>Lufttemperatur: </b> ${prop.LT ? prop.LT + " °C" : "nicht verfügbar"} <br>
+                            <b>Relative Luftfeuchte: </b>${prop.RH ? prop.RH + " %" : "nicht verfügbar"} <br>
+                            <b>Windgeschwindigkeit:</b> ${prop.WG ? (prop.WG * 3.6) .toFixed(1) + " km/h" : "nicht verfügbar"} <br>
+                            <b>Schneehöhe: </b>${prop.HS ? prop.HS + " cm" : "nicht verfügbar"}<br><br>
                             <span>${pointInTime.toLocaleString()}</span>
                             `);
         }
     }).addTo(themaLayer.stations);
 
 }
-showStations("https://static.avalanche.report/weather_stations/stations.geojson");
+//Wetterstationen
+async function loadStations(url) {
+    let response = await fetch(url);
+    let jsondata = await response.json();
+    writeStationLayer(jsondata);
+}
+loadStations("https://static.avalanche.report/weather_stations/stations.geojson");
