@@ -20,7 +20,8 @@ let themaLayer = {
 let layerControl = L.control.layers({
     "Relief avalanche.report": L.tileLayer(
         "https://static.avalanche.report/tms/{z}/{x}/{y}.webp", {
-        attribution: `© <a href="https://lawinen.report">CC BY avalanche.report</a>`
+        attribution: `© <a href="https://lawinen.report">CC BY avalanche.report</a>` ,
+        maxZoom: 12
     }).addTo(map),
     "Openstreetmap": L.tileLayer.provider("OpenStreetMap.Mapnik"),
     "Esri WorldTopoMap": L.tileLayer.provider("Esri.WorldTopoMap"),
@@ -50,12 +51,11 @@ async function showStations(url) {
                 })
             });
         },
-        
         onEachFeature: function (feature, layer) {
             layer.bindPopup(`<h3>${feature.properties.name}, ${feature.geometry.coordinates[2]} m </h3><br> 
                             <b>Lufttemperatur: </b> ${feature.properties.LT ? feature.properties.LT + " °C" : "nicht verfügbar"} <br>
                             <b>Relative Luftfeuchte: </b>${feature.properties.RH ? feature.properties.RH + " %" : "nicht verfügbar"} <br>
-                            <b>Windgeschwindigkeit:</b> ${feature.properties.WG ? feature.properties.WG + " km/h" : "nicht verfügbar"} <br>
+                            <b>Windgeschwindigkeit:</b> ${feature.properties.WG ? (feature.properties.WG * 3.6) .toFixed(1) + " km/h" : "nicht verfügbar"} <br>
                             <b>Schneehöhe: </b>${feature.properties.HS ? feature.properties.HS + " cm" : "nicht verfügbar"}`);
         }
     }).addTo(themaLayer.stations);
