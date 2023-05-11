@@ -39,6 +39,7 @@ L.control.scale({
 async function showStations(url) {
     let response = await fetch(url);
     let jsondata = await response.json();
+
     console.log(jsondata.features);
     L.geoJSON(jsondata, {
         pointToLayer: function (feature, latlng) {
@@ -52,11 +53,17 @@ async function showStations(url) {
             });
         },
         onEachFeature: function (feature, layer) {
+            let prop = feature.properties;
+
+            let pointInTime = new Date (prop.date);
+            console.log(pointInTime);
             layer.bindPopup(`<h3>${feature.properties.name}, ${feature.geometry.coordinates[2]} m </h3><br> 
                             <b>Lufttemperatur: </b> ${feature.properties.LT ? feature.properties.LT + " °C" : "nicht verfügbar"} <br>
                             <b>Relative Luftfeuchte: </b>${feature.properties.RH ? feature.properties.RH + " %" : "nicht verfügbar"} <br>
                             <b>Windgeschwindigkeit:</b> ${feature.properties.WG ? (feature.properties.WG * 3.6) .toFixed(1) + " km/h" : "nicht verfügbar"} <br>
-                            <b>Schneehöhe: </b>${feature.properties.HS ? feature.properties.HS + " cm" : "nicht verfügbar"}`);
+                            <b>Schneehöhe: </b>${feature.properties.HS ? feature.properties.HS + " cm" : "nicht verfügbar"}<br><br>
+                            <span>${pointInTime.toLocaleString()}</span>
+                            `);
         }
     }).addTo(themaLayer.stations);
 
