@@ -39,6 +39,15 @@ L.control.scale({
     imperial: false,
 }).addTo(map);
 
+function getColor(value, ramp){
+    for (let rule of ramp) {
+        if(value >= rule.min && value < rule.max){
+            return rule.color;
+        }
+    }
+}
+console.log(getColor(0, COLORS.temperature));
+
 function writeStationLayer(jsondata){
     L.geoJSON(jsondata, {
         pointToLayer: function (feature, latlng) {
