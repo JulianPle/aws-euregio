@@ -23,7 +23,7 @@ let themaLayer = {
 let layerControl = L.control.layers({
     "Relief avalanche.report": L.tileLayer(
         "https://static.avalanche.report/tms/{z}/{x}/{y}.webp", {
-        attribution: `© <a href="https://lawinen.report">CC BY avalanche.report</a>` ,
+        attribution: `© <a href="https://lawinen.report">CC BY avalanche.report</a>`,
         maxZoom: 12
     }).addTo(map),
     "Openstreetmap": L.tileLayer.provider("OpenStreetMap.Mapnik"),
@@ -43,15 +43,27 @@ L.control.scale({
     imperial: false,
 }).addTo(map);
 
-function getColor(value, ramp){
+// Rainviewer
+L.control.rainviewer({
+    position: 'bottomleft',
+    nextButtonText: '>',
+    playStopButtonText: 'Play/Stop',
+    prevButtonText: '<',
+    positionSliderLabelText: "Hour:",
+    opacitySliderLabelText: "Opacity:",
+    animationInterval: 500,
+    opacity: 0.5
+}).addTo(map);
+
+function getColor(value, ramp) {
     for (let rule of ramp) {
-        if(value >= rule.min && value < rule.max){
+        if (value >= rule.min && value < rule.max) {
             return rule.color;
         }
     }
 }
 
-function writeStationLayer(jsondata){
+function writeStationLayer(jsondata) {
     L.geoJSON(jsondata, {
         pointToLayer: function (feature, latlng) {
             return L.marker(latlng, {
@@ -66,12 +78,12 @@ function writeStationLayer(jsondata){
         onEachFeature: function (feature, layer) {
             let prop = feature.properties;
 
-            let pointInTime = new Date (prop.date);
+            let pointInTime = new Date(prop.date);
             //console.log(pointInTime);
             layer.bindPopup(`<h3>${prop.name}, ${feature.geometry.coordinates[2]} m </h3><br> 
                             <b>Lufttemperatur: </b> ${prop.LT ? prop.LT + " °C" : "nicht verfügbar"} <br>
                             <b>Relative Luftfeuchte: </b>${prop.RH ? prop.RH + " %" : "nicht verfügbar"} <br>
-                            <b>Windgeschwindigkeit:</b> ${prop.WG ? (prop.WG * 3.6) .toFixed(1) + " km/h" : "nicht verfügbar"} <br>
+                            <b>Windgeschwindigkeit:</b> ${prop.WG ? (prop.WG * 3.6).toFixed(1) + " km/h" : "nicht verfügbar"} <br>
                             <b>Schneehöhe: </b>${prop.HS ? prop.HS + " cm" : "nicht verfügbar"}<br><br>
                             <span>${pointInTime.toLocaleString()}</span>
                             `);
@@ -80,9 +92,9 @@ function writeStationLayer(jsondata){
 
 }
 
-function writeTemperatureLayer(jsondata){
+function writeTemperatureLayer(jsondata) {
     L.geoJSON(jsondata, {
-        filter: function(feature){
+        filter: function (feature) {
             if (feature.properties.LT > -50 && feature.properties.LT < 50) {
                 return true;
             }
@@ -92,18 +104,18 @@ function writeTemperatureLayer(jsondata){
             return L.marker(latlng, {
                 icon: L.divIcon({
                     className: "aws-div-icon",
-                   html:`<span style="background-color:${color}">${feature.properties.LT.toFixed(1)}</span>`
+                    html: `<span style="background-color:${color}">${feature.properties.LT.toFixed(1)}</span>`
                 })
             });
         },
-        
+
     }).addTo(themaLayer.temperature);
 
 }
 
-function writeWindLayer(jsondata){
+function writeWindLayer(jsondata) {
     L.geoJSON(jsondata, {
-        filter: function(feature){
+        filter: function (feature) {
             if (feature.properties.WG > 0 && feature.properties.WG < 300) {
                 return true;
             }
@@ -113,16 +125,16 @@ function writeWindLayer(jsondata){
             return L.marker(latlng, {
                 icon: L.divIcon({
                     className: "aws-div-icon",
-                   html:`<span style="background-color:${color}">${feature.properties.WG.toFixed(1)}</span>`
+                    html: `<span style="background-color:${color}">${feature.properties.WG.toFixed(1)}</span>`
                 })
             });
         },
     }).addTo(themaLayer.wind);
 }
 
-function writeSnowLayer(jsondata){
+function writeSnowLayer(jsondata) {
     L.geoJSON(jsondata, {
-        filter: function(feature){
+        filter: function (feature) {
             if (feature.properties.HS >= 0 && feature.properties.HS < 1000) {
                 return true;
             }
@@ -132,7 +144,7 @@ function writeSnowLayer(jsondata){
             return L.marker(latlng, {
                 icon: L.divIcon({
                     className: "aws-div-icon",
-                   html:`<span style="background-color:${color}">${feature.properties.HS.toFixed(1)}</span>`
+                    html: `<span style="background-color:${color}">${feature.properties.HS.toFixed(1)}</span>`
                 })
             });
         },
